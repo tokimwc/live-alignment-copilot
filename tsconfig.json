@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/contracts" },
+    { "path": "./packages/test-fixtures" },
+    { "path": "./packages/planner" },
+    { "path": "./packages/scene-engine" },
+    { "path": "./apps/server" },
+    { "path": "./apps/web" }
+  ]
+}

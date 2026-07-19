@@ -1,0 +1,19 @@
+{
+  "name": "@lac/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lac/contracts": "workspace:*",
+    "@lac/planner": "workspace:*",
+    "@lac/scene-engine": "workspace:*",
+    "@lac/test-fixtures": "workspace:*",
+    "@lac/web": "workspace:*"
+  }
+}

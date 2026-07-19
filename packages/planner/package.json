@@ -1,0 +1,17 @@
+{
+  "name": "@lac/planner",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lac/contracts": "workspace:*",
+    "@lac/test-fixtures": "workspace:*",
+    "@lac/scene-engine": "workspace:*"
+  }
+}
