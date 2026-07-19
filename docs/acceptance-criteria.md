@@ -42,7 +42,7 @@
 | AC-26 | One English-first screen explains the product and the four-stage safe publication flow.           | `apps/web/src/judge-demo.ts`, `tests/e2e/judge-demo.test.ts`.                 |
 | AC-27 | Run planner, Approve, Reject, Undo, and Reset are wired through the server controller.            | `apps/server/src/judge-demo.ts`, `apps/server/src/demo-server.ts`, judge e2e. |
 | AC-28 | A missing/blank API key selects the deterministic planner without a fetch call.                   | `createPlannerAdapter`, planner unit test.                                    |
-| AC-29 | A present key selects `gpt-5.6-sol` by default and sends a strict Responses schema request.       | `Gpt56ResponsesPlanner`, fake-fetch request-shape unit test.                  |
+| AC-29 | A present key selects `gpt-5.6-terra` by default and sends a strict Responses schema request.     | `Gpt56ResponsesPlanner`, fake-fetch request-shape unit test.                  |
 | AC-30 | Invalid commands and unknown transcript source IDs are rejected after the model boundary.         | Planner schema/source rejection unit tests.                                   |
 | AC-31 | Invalid model output leaves the current Audience scene unchanged and returns a safe error.        | `JudgeDemoController`, fail-closed judge e2e.                                 |
 | AC-32 | Browser HTML/state contains no API key and uses text-only DOM sinks for untrusted values.         | Judge UI e2e contract, `renderJudgeDemoPage`.                                 |

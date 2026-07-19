@@ -180,3 +180,14 @@ map` flow.
   status to match the public repo state.
 - Next minimal fix: rerun local-path and secret-pattern scans, then rerun the
   full verification gate before rewriting the public root commit.
+
+## 2026-07-19 - Runtime Planner Model Cost Update
+
+- Change: switched the optional GPT-5.6 runtime planner default from Sol to
+  Terra, keeping Luna as the documented low-cost override through
+  `OPENAI_PLANNER_MODEL`.
+- Change: updated the server-side planner label so Terra, Luna, and explicit Sol
+  overrides are displayed accurately instead of hard-coding Sol.
+- Result: format, lint, typecheck, 31 unit tests, 7 e2e tests, and build passed.
+- Next minimal fix: push the cost-posture update before final Devpost assets are
+  prepared.

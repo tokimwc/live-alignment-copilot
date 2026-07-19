@@ -29,7 +29,7 @@ Record reversible assumptions and architecture decisions here.
 
 - Preserve the existing `PlannerBoundary`, reducer, fixture planner, and export
   paths; add GPT-5.6 as one adapter instead of restructuring the repo.
-- Default the remote planner to the explicit `gpt-5.6-sol` flagship model and
+- Default the remote planner to the explicit `gpt-5.6-terra` balanced model and
   Responses API. Use `store: false` and low reasoning effort for this bounded
   structured-planning task.
 - Constrain the remote structured-output schema to the smallest visually useful
@@ -65,3 +65,13 @@ Record reversible assumptions and architecture decisions here.
 - Keep deterministic keyless mode as the reproducible judge default. The
   server-only GPT-5.6 adapter remains optional and a paid API run is not a
   submission blocker.
+
+## 2026-07-19 - Runtime Planner Cost Posture
+
+- Keep Codex-assisted engineering history separate from runtime API cost. Codex
+  may have used GPT-5.6 Sol during development, but the demo app does not need
+  Sol as its default planner.
+- Use `gpt-5.6-terra` as the default runtime planner because this slice asks for
+  small strict JSON `SceneCommand` proposals, not long-horizon autonomous coding.
+- Keep `gpt-5.6-luna` as the documented low-cost override through
+  `OPENAI_PLANNER_MODEL`.

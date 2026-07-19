@@ -97,7 +97,7 @@ describe("judge-friendly vertical slice", () => {
     const controller = new JudgeDemoController({
       planner: new FixtureThenInvalidPlanner(),
       plannerMode: "gpt-5.6",
-      model: "gpt-5.6-sol",
+      model: "gpt-5.6-terra",
       now: () => "2026-07-18T12:00:00.000+09:00",
     });
 

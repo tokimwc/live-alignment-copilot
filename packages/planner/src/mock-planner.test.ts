@@ -132,7 +132,7 @@ describe("GPT-5.6 Responses planner", () => {
     }
     const requestBody: unknown = JSON.parse(bodyText);
     expect(requestBody).toMatchObject({
-      model: "gpt-5.6-sol",
+      model: DEFAULT_GPT_PLANNER_MODEL,
       store: false,
       reasoning: { effort: "low" },
       text: {

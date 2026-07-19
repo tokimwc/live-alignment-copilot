@@ -9,7 +9,7 @@ workflow that judges can understand immediately, while the product continues to
 support Japanese and multilingual transcripts.
 
 When `OPENAI_API_KEY` is available, a server-side Responses API adapter uses
-`gpt-5.6-sol` by default. Without a key, the same UI automatically selects the
+`gpt-5.6-terra` by default. Without a key, the same UI automatically selects the
 deterministic fixture planner, so judges and tests can run the complete approval
 loop without secrets.
 
@@ -42,9 +42,12 @@ To exercise the GPT-5.6 boundary, set the key only in the server shell:
 
 ```powershell
 $env:OPENAI_API_KEY="<your key>"
-$env:OPENAI_PLANNER_MODEL="gpt-5.6-sol" # optional; this is the default
+$env:OPENAI_PLANNER_MODEL="gpt-5.6-terra" # optional; this is the default
 pnpm demo
 ```
+
+Use `gpt-5.6-luna` instead when cost and latency matter more than planner
+quality.
 
 The key is never included in browser HTML, API state, logs, artifacts, or test
 output. The demo server binds to `127.0.0.1` by default.
@@ -71,7 +74,7 @@ the current state.
 Browser: live meeting transcript + review controls
   -> loopback server (the browser never receives OPENAI_API_KEY)
   -> createPlannerAdapter
-       ├─ key present: GPT-5.6 Sol / Responses / strict JSON Schema
+       ├─ key present: GPT-5.6 Terra by default / Responses / strict JSON Schema
        └─ no key: DeterministicFixturePlanner
   -> existing Zod SceneCommand validation
   -> proposal queue + previewScene
@@ -131,10 +134,12 @@ submission narrative, and ran the verification gate. Codex is not embedded in
 the shipped runtime.
 
 GPT-5.6 is the optional runtime planner. The default model is the explicit
-`gpt-5.6-sol` flagship identifier, called only from the server through the
+`gpt-5.6-terra` balanced identifier, called only from the server through the
 Responses API with `store: false`, low reasoning effort, and a strict JSON
-Schema. Application-side Zod validation remains mandatory even after structured
-output, and Presenter approval remains mandatory after validation.
+Schema. `gpt-5.6-luna` can be selected through `OPENAI_PLANNER_MODEL` for a more
+cost-efficient demo run. Application-side Zod validation remains mandatory even
+after structured output, and Presenter approval remains mandatory after
+validation.
 
 ## Safety Boundaries
 

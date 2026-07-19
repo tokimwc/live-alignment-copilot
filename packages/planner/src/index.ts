@@ -5,7 +5,7 @@ import { judgeSceneCommandFixtures, validSceneCommandFixtures } from "@lac/test-
 
 export type PlannerAdapter = PlannerBoundary;
 
-export const DEFAULT_GPT_PLANNER_MODEL = "gpt-5.6-sol";
+export const DEFAULT_GPT_PLANNER_MODEL = "gpt-5.6-terra";
 
 const RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses";
 const FIXTURE_MODEL = "deterministic-fixture-planner";

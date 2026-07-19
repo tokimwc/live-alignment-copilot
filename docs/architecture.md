@@ -32,7 +32,7 @@ No OPENAI_API_KEY:
   -> DeterministicFixturePlanner -> Zod-validated SceneCommand[]
 
 OPENAI_API_KEY present:
-  -> server-side gpt-5.6-sol Responses request
+  -> server-side gpt-5.6-terra Responses request by default
   -> strict JSON Schema response
   -> exact-shape + Zod + source-id validation
   -> SceneCommand[]

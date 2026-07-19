@@ -128,7 +128,7 @@ approval -> Published audience map` explicit.
   reads `OPENAI_API_KEY`.
 - `createPlannerAdapter` must select the deterministic fixture planner when the
   key is missing or blank, without attempting a network request.
-- With a key, the default model must be `gpt-5.6-sol` and the planner must call
+- With a key, the default model must be `gpt-5.6-terra` and the planner must call
   the Responses API with `store: false` and strict JSON Schema output.
 - Remote output must pass exact-shape checks, existing Zod `SceneCommand`
   validation, allowed-command checks, and input `sourceSegmentId` checks before

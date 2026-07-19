@@ -86,7 +86,7 @@ export class JudgeDemoController {
         label:
           this.#plannerMode === "fixture"
             ? "Deterministic fixture · no API key"
-            : "GPT-5.6 Sol · server-side",
+            : `${formatGpt56ModelLabel(this.#model)} · server-side`,
       },
       transcriptText: this.#transcriptText,
       presenter: renderPresenterPage(this.#session),
@@ -176,6 +176,19 @@ export class JudgeDemoController {
       startedAt: "2026-06-20T00:00:00.000+09:00",
       transcriptChunks: judgeTranscriptChunks,
     });
+  }
+}
+
+function formatGpt56ModelLabel(model: string): string {
+  switch (model) {
+    case "gpt-5.6-sol":
+      return "GPT-5.6 Sol";
+    case "gpt-5.6-terra":
+      return "GPT-5.6 Terra";
+    case "gpt-5.6-luna":
+      return "GPT-5.6 Luna";
+    default:
+      return model;
   }
 }
 

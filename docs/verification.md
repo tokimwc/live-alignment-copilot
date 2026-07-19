@@ -307,3 +307,22 @@ Final required command results after sanitization:
 - `pnpm test`: passed; 4 files, 31 tests.
 - `pnpm test:e2e`: passed; 3 files, 7 tests.
 - `pnpm build`: passed; `tsc -b --pretty false` completed.
+
+## 2026-07-19 - Runtime Planner Model Cost Update
+
+Implemented evidence:
+
+- Default optional GPT-5.6 planner model changed from `gpt-5.6-sol` to
+  `gpt-5.6-terra`.
+- `OPENAI_PLANNER_MODEL=gpt-5.6-luna` is documented as the lower-cost override.
+- Server state now displays the active GPT-5.6 variant label instead of
+  hard-coding Sol.
+
+Final required command results:
+
+- `pnpm format:check`: passed; all matched files use Prettier style.
+- `pnpm lint`: passed with zero warnings/errors.
+- `pnpm typecheck`: passed; `tsc -b --pretty false` completed.
+- `pnpm test`: passed; 4 files, 31 tests.
+- `pnpm test:e2e`: passed; 3 files, 7 tests.
+- `pnpm build`: passed; `tsc -b --pretty false` completed.

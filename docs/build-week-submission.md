@@ -11,9 +11,9 @@ the Audience panel. Japanese and multilingual transcripts remain supported.
 
 The submission has two planner lanes behind the same typed boundary:
 
-- With `OPENAI_API_KEY`, the loopback server calls `gpt-5.6-sol` through the
-  Responses API using strict structured output, then validates every command
-  again with the existing Zod schema.
+- With `OPENAI_API_KEY`, the loopback server calls `gpt-5.6-terra` by default
+  through the Responses API using strict structured output, then validates every
+  command again with the existing Zod schema.
 - Without a key, the same UI automatically uses the deterministic English judge
   fixture. The original Japanese fixture path remains tested, while the judge
   path stays reproducible and secret-free.
@@ -45,7 +45,8 @@ Open `http://127.0.0.1:4185`.
 5. **Undo** reverses the last approved scene change; **Reset** restores the
    keyless starting state.
 
-The mode badge makes the active path explicit: `GPT-5.6 Sol · server-side` or
+The mode badge makes the active path explicit, such as
+`GPT-5.6 Terra · server-side`, `GPT-5.6 Luna · server-side`, or
 `Deterministic fixture · no API key`.
 
 Keyless mode is intentionally a repeatable English fixture mapping: line IDs
@@ -56,7 +57,7 @@ For a human-authorized GPT run:
 
 ```powershell
 $env:OPENAI_API_KEY="<your key>"
-$env:OPENAI_PLANNER_MODEL="gpt-5.6-sol" # optional
+$env:OPENAI_PLANNER_MODEL="gpt-5.6-terra" # optional default; use gpt-5.6-luna to spend less
 pnpm demo
 ```
 
@@ -77,7 +78,7 @@ pnpm demo
 
 ```text
 Meeting TranscriptChunk[] + current SceneModel
-  -> server-side gpt-5.6-sol Responses call (store: false)
+  -> server-side gpt-5.6-terra Responses call by default (store: false)
   -> strict JSON Schema: add_node | connect_nodes | highlight
   -> parse response text
   -> exact shape + existing Zod SceneCommand validation
