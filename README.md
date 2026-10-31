@@ -107,14 +107,30 @@ All automated tests use fixtures, fake `fetch` responses, and loopback-only
 HTTP. They never require or call an OpenAI credential and need no microphone.
 
 Environment this was verified on: Linux, Node.js v22.23.4, pnpm 10.10.0 (the
-`packageManager` pin). Other Node versions, operating systems, and
-performance characteristics have not been verified.
+`packageManager` pin). **Windows was not verified**: the PowerShell commands below
+are provided for convenience but have not been run on a real Windows machine.
+Other Node versions, operating systems, and performance characteristics are
+likewise unverified.
 
 Reproduce on Linux without any API key:
 
 ```bash
 corepack enable                      # or install pnpm 10.10.0 another way
 unset OPENAI_API_KEY                 # not needed by any check below
+pnpm install --frozen-lockfile       # fails if pnpm-lock.yaml is out of date
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test        # unit tests: packages/**/*.test.ts
+pnpm test:e2e    # controller / HTTP / HTML contract tests: tests/e2e/**/*.test.ts
+pnpm build       # tsc -b
+```
+
+Reproduce on Windows (PowerShell) without any API key (unverified on Windows):
+
+```powershell
+corepack enable                      # or install pnpm 10.10.0 another way
+$env:OPENAI_API_KEY=$null            # not needed by any check below
 pnpm install --frozen-lockfile       # fails if pnpm-lock.yaml is out of date
 pnpm format:check
 pnpm lint
@@ -137,7 +153,13 @@ The judge-slice evidence is concentrated in:
   request shape, schema/source rejection, and secret-safe transport errors.
 - `packages/planner/src/response-boundary.test.ts`: refusal, incomplete or
   malformed Responses payloads, multiple `output_text` parts, the 20-command
-  cap, and thrown-fetch handling, all against fake `fetch`.
+  cap, and thrown-fetch handling, all against fake `fetch`. Two tests are
+  characterizations of current adapter behavior, not endorsed product
+  contracts: concatenating multiple `output_text` parts before parsing, and
+  preferring a top-level `output_text` string over the `output` array. One
+  test is an expected failure (`it.fails`): a refusal next to a top-level
+  `output_text` is currently not rejected, although the requirements say
+  refusals must enqueue nothing. It is recorded, not fixed, in this change.
 - `tests/e2e/http-boundary.test.ts`: malformed JSON, the 32 KiB body cap, the
   80-character `commandId` cap, unknown URLs, and unchanged state after rejected
   requests, over loopback HTTP.

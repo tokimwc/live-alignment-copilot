@@ -40,9 +40,26 @@ function plannerReturning(response: () => Response | Promise<Response>): Gpt56Re
   return new Gpt56ResponsesPlanner({ apiKey: TEST_KEY, fetch: async () => response() });
 }
 
+// Every command in a batch gets its own commandId, idempotencyKey and node id, so no test here
+// depends on (or pins) how the adapter treats duplicate identifiers.
+function uniqueCommand(index: number) {
+  const base = validSceneCommandFixtures.find((command) => command.type === "add_node");
+  if (base?.type !== "add_node") {
+    throw new Error(
+      "fixture invariant: validSceneCommandFixtures must contain an add_node command",
+    );
+  }
+  return {
+    ...base,
+    commandId: `cmd-batch-${index}`,
+    idempotencyKey: `batch-${index}-add-node`,
+    payload: { node: { ...base.payload.node, id: `node-batch-${index}` } },
+  };
+}
+
 function batch(count: number): string {
   return JSON.stringify({
-    commands: Array.from({ length: count }, () => validSceneCommandFixtures[0]),
+    commands: Array.from({ length: count }, (_unused, index) => uniqueCommand(index)),
   });
 }
 
@@ -118,8 +135,8 @@ describe("Gpt56ResponsesPlanner response boundary", () => {
   it("rejects the whole batch when one command is invalid among valid ones", async () => {
     const text = JSON.stringify({
       commands: [
-        validSceneCommandFixtures[0],
-        { ...validSceneCommandFixtures[0], sourceSegmentIds: ["chunk-not-in-input"] },
+        uniqueCommand(0),
+        { ...uniqueCommand(1), sourceSegmentIds: ["chunk-not-in-input"] },
       ],
     });
     const planner = plannerReturning(() => jsonResponse(messageWith(outputText(text))));
@@ -169,17 +186,44 @@ describe("Gpt56ResponsesPlanner response boundary", () => {
   });
 
   // CHARACTERIZATION ONLY: a top-level `output_text` string is preferred over the `output` array.
+  // The output array here deliberately holds no refusal: this test pins precedence only and says
+  // nothing about refusal handling (see the refusal tests above and the known failure below).
   it("characterization: prefers a top-level output_text string over the output array", async () => {
     const planner = plannerReturning(() =>
       jsonResponse({
         status: "completed",
         output_text: batch(1),
-        output: [{ type: "message", content: [{ type: "refusal", refusal: "ignored" }] }],
+        output: [
+          { type: "message", content: [outputText("not json, ignored in favor of top level")] },
+        ],
       }),
     );
 
     await expect(planner.plan(planInput)).resolves.toHaveLength(1);
   });
+
+  // KNOWN FAILURE (expected-failure, existing adapter behavior; the adapter is intentionally not
+  // changed in this review-fix): docs/requirements.md ("refusals ... must enqueue nothing") and
+  // docs/architecture.md ("Any ... refusal ... -> no enqueue") require a refusal to fail closed.
+  // extractOutputText() returns a top-level `output_text` string before it ever inspects the
+  // `output` array, so a refusal item next to a top-level `output_text` is currently ignored and
+  // the commands are returned. The assertion below states the REQUIRED behavior; `it.fails` passes
+  // while the adapter still violates it and starts failing once the adapter is fixed, at which
+  // point `.fails` must be removed. Whether a real Responses payload can carry both is unverified.
+  it.fails(
+    "rejects a refusal in output even when a top-level output_text string is present",
+    async () => {
+      const planner = plannerReturning(() =>
+        jsonResponse({
+          status: "completed",
+          output_text: batch(1),
+          output: [{ type: "message", content: [{ type: "refusal", refusal: "no" }] }],
+        }),
+      );
+
+      await expect(planner.plan(planInput)).rejects.toBeInstanceOf(PlannerValidationError);
+    },
+  );
 
   it("maps a thrown fetch to a transport error without leaking the thrown message or the key", async () => {
     const marker = "RAW_FETCH_EXCEPTION_MUST_NOT_LEAK";

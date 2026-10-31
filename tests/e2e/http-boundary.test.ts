@@ -170,7 +170,7 @@ describe("demo HTTP boundary (loopback, no API key)", () => {
     expect(await getState()).toEqual(before);
   });
 
-  it("rejects a body over 32 KiB (counted in bytes) and accepts one of exactly 32 KiB at the size gate", async () => {
+  it("rejects a body over 32 KiB (counted in bytes) and accepts a valid plan request of exactly 32 KiB", async () => {
     const { send, getState } = await startHarness();
     const before = await getState();
 
@@ -189,15 +189,24 @@ describe("demo HTTP boundary (loopback, no API key)", () => {
 
     expect(await getState()).toEqual(before);
 
-    // Exactly at the limit passes the size gate. It then reaches the controller, which rejects the
-    // over-long line as input validation (HTTP 200 + safe error), not as a size error (HTTP 400).
-    const atLimit = jsonBody({
-      transcriptText: "a".repeat(MAX_REQUEST_BYTES - Buffer.byteLength(envelope)),
-    });
+    // Exactly at the limit passes the size gate. Trailing JSON whitespace pads a valid plan request
+    // to the cap, so the outcome depends only on the size gate, not on transcript content rules.
+    const validPlan = jsonBody({ transcriptText: defaultJudgeDemoTranscript });
+    const atLimit = validPlan + " ".repeat(MAX_REQUEST_BYTES - Buffer.byteLength(validPlan));
     expect(Buffer.byteLength(atLimit)).toBe(MAX_REQUEST_BYTES);
     const accepted = await send("POST", "/api/plan", atLimit);
     expect(accepted.status).toBe(200);
-    expect(JSON.parse(accepted.text)).toMatchObject({ error: { code: "INPUT_VALIDATION_FAILED" } });
+    const acceptedState = JSON.parse(accepted.text) as {
+      error: unknown;
+      presenter: { proposalQueue: unknown[] };
+    };
+    expect(acceptedState.error).toBeNull();
+    expect(acceptedState.presenter.proposalQueue).toHaveLength(10);
+
+    // The same valid request one byte over the cap is refused by the size gate.
+    const oneOver = atLimit + " ";
+    expect(Buffer.byteLength(oneOver)).toBe(MAX_REQUEST_BYTES + 1);
+    expect((await send("POST", "/api/plan", oneOver)).status).toBe(400);
   });
 
   it("rejects commandId longer than 80 chars while an 80-char unknown id only gets a safe action error", async () => {
@@ -242,7 +251,7 @@ describe("demo HTTP boundary (loopback, no API key)", () => {
     expect(planned.presenter.proposalQueue).toHaveLength(10);
     expect(planned.audience.scene.nodes).toHaveLength(0);
 
-    await send("POST", "/api/approve", "{broken");
+    expect((await send("POST", "/api/approve", "{broken")).status).toBe(400);
     const unchanged = JSON.parse((await send("GET", "/api/state")).text) as typeof planned;
     expect(unchanged.audience.scene.nodes).toHaveLength(0);
 
@@ -256,6 +265,7 @@ describe("demo HTTP boundary (loopback, no API key)", () => {
     const leakMarker = "RAW_PLANNER_ERROR_MUST_NOT_LEAK";
     let calls = 0;
     const flaky: PlannerBoundary = {
+      name: "flaky-test-planner",
       async plan(input) {
         calls += 1;
         if (calls > 1) {
@@ -289,6 +299,7 @@ describe("demo HTTP boundary (loopback, no API key)", () => {
 
   it("maps a planner transport error to a safe error and leaves a fresh session untouched", async () => {
     const failing: PlannerBoundary = {
+      name: "failing-test-planner",
       async plan() {
         throw new PlannerTransportError();
       },
