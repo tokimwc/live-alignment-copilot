@@ -103,22 +103,44 @@ Python, shell, Manim, or renderer code.
 
 ## Test and Verification
 
-All automated tests use fixtures and fake fetch responses; they never require or
-call an OpenAI credential.
+All automated tests use fixtures, fake `fetch` responses, and loopback-only
+HTTP. They never require or call an OpenAI credential and need no microphone.
 
-```powershell
+Environment this was verified on: Linux, Node.js v22.23.4, pnpm 10.10.0 (the
+`packageManager` pin). Other Node versions, operating systems, and
+performance characteristics have not been verified.
+
+Reproduce on Linux without any API key:
+
+```bash
+corepack enable                      # or install pnpm 10.10.0 another way
+unset OPENAI_API_KEY                 # not needed by any check below
+pnpm install --frozen-lockfile       # fails if pnpm-lock.yaml is out of date
 pnpm format:check
 pnpm lint
 pnpm typecheck
-pnpm test
-pnpm test:e2e
-pnpm build
+pnpm test        # unit tests: packages/**/*.test.ts
+pnpm test:e2e    # controller / HTTP / HTML contract tests: tests/e2e/**/*.test.ts
+pnpm build       # tsc -b
 ```
+
+What `pnpm test:e2e` is and is not: despite the name, it runs Vitest against the
+`JudgeDemoController`, the HTTP handler on a loopback ephemeral port, and the
+rendered HTML string. It does **not** drive a real browser, so it is not browser
+QA (layout, real DOM behavior, the 1280×720 and 390px checks). It also does not
+call the real OpenAI API; the GPT-5.6 adapter is exercised only against fake
+responses, so real-API behavior is unverified by these checks.
 
 The judge-slice evidence is concentrated in:
 
 - `packages/planner/src/mock-planner.test.ts`: no-key fallback, strict GPT-5.6
   request shape, schema/source rejection, and secret-safe transport errors.
+- `packages/planner/src/response-boundary.test.ts`: refusal, incomplete or
+  malformed Responses payloads, multiple `output_text` parts, the 20-command
+  cap, and thrown-fetch handling, all against fake `fetch`.
+- `tests/e2e/http-boundary.test.ts`: malformed JSON, the 32 KiB body cap, the
+  80-character `commandId` cap, unknown URLs, and unchanged state after rejected
+  requests, over loopback HTTP.
 - `tests/e2e/judge-demo.test.ts`: visible UI contract, approval-before-publish,
   reject, undo, reset, unsafe input rejection, and invalid-output fail-closed
   behavior.

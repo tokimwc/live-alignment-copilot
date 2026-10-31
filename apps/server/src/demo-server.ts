@@ -59,9 +59,10 @@ async function handleRequest(
   response: ServerResponse,
 ): Promise<void> {
   setSecurityHeaders(response);
-  const url = new URL(request.url ?? "/", "http://127.0.0.1");
 
   try {
+    const url = new URL(request.url ?? "/", "http://127.0.0.1");
+
     if (request.method === "GET" && url.pathname === "/") {
       sendHtml(response, renderJudgeDemoPage());
       return;
